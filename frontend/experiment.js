@@ -60,6 +60,87 @@ const jsPsych = initJsPsych({
   };
   
   timeline.push(welcome);
+
+
+  const participantInfo = {
+    type: jsPsychHtmlKeyboardResponse,
+  
+    stimulus: `
+      <div class="min-h-screen flex items-center justify-center px-6">
+        <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 md:p-12">
+  
+          <h2 class="text-3xl font-bold text-gray-800 text-center mb-8">
+            اطلاعات شرکت‌کننده
+          </h2>
+  
+          <label
+            for="student-id"
+            class="block text-lg font-medium text-gray-700 mb-3"
+          >
+            شماره دانشجویی
+          </label>
+  
+          <input
+            id="student-id"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg text-center"
+            placeholder="شماره دانشجویی خود را وارد کنید"
+          />
+  
+          <p id="student-id-error"
+             class="text-red-600 text-center mt-3 hidden">
+            لطفاً شماره دانشجویی خود را وارد کنید.
+          </p>
+  
+          <button
+            id="continue-button"
+            type="button"
+            class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 text-lg font-bold"
+          >
+            ادامه
+          </button>
+  
+        </div>
+      </div>
+    `,
+  
+    choices: "NO_KEYS",
+  
+    on_load: function () {
+      const input = document.getElementById("student-id");
+      const error = document.getElementById("student-id-error");
+      const button = document.getElementById("continue-button");
+  
+      input.focus();
+  
+      function continueToInstructions() {
+        const studentId = input.value.trim();
+  
+        if (studentId === "") {
+          error.classList.remove("hidden");
+          input.focus();
+          return;
+        }
+  
+        jsPsych.finishTrial({
+          student_id: studentId,
+        });
+      }
+  
+      button.addEventListener("click", continueToInstructions);
+  
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          continueToInstructions();
+        }
+      });
+    },
+  };
+  
+  timeline.push(participantInfo);
   
   
   // ========================================
