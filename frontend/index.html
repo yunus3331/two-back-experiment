@@ -1,5 +1,40 @@
-const jsPsych = initJsPsych();
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
 
-const timeline = [];
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-jsPsych.run(timeline);
+  <title>آزمایش 2-Back</title>
+
+  <!-- jsPsych -->
+  <script src="https://unpkg.com/jspsych@8.3.0"></script>
+
+  <!-- jsPsych HTML Keyboard Response Plugin -->
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.2.0"></script>
+
+  <!-- jsPsych CSS -->
+  <link
+    href="https://unpkg.com/jspsych@8.3.0/css/jspsych.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Project CSS -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+  <div id="jspsych-target"></div>
+
+  <script src="./experiment.js"></script>
+
+</body>
+</html>
