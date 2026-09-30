@@ -291,7 +291,7 @@ const jsPsych = initJsPsych({
       return `
         <div
           id="nback-stimulus"
-          class="h-screen flex items-center justify-center"
+          class="h-screen flex items-center justify-center select-none"
         >
           <div class="text-7xl md:text-8xl font-bold text-gray-800">
             ${stimChar}
@@ -525,7 +525,240 @@ const jsPsych = initJsPsych({
   };
   
   timeline.push(stage1Feedback);
+
+
+  // ========================================
+// Stage 2 Trials
+// ========================================
+
+const stage2Trials = [
+    { stim_char: "A", corr_ans: null },
+    { stim_char: "D", corr_ans: null },
+    { stim_char: "A", corr_ans: " " },
+    { stim_char: "D", corr_ans: " " },
+    { stim_char: "H", corr_ans: null },
+    { stim_char: "H", corr_ans: null },
+    { stim_char: "H", corr_ans: " " },
+    { stim_char: "J", corr_ans: null },
+    { stim_char: "J", corr_ans: null },
+    { stim_char: "H", corr_ans: null },
+    { stim_char: "S", corr_ans: null },
+    { stim_char: "E", corr_ans: null },
+    { stim_char: "H", corr_ans: null },
+    { stim_char: "E", corr_ans: " " },
+    { stim_char: "S", corr_ans: null },
+    { stim_char: "K", corr_ans: null },
+    { stim_char: "L", corr_ans: null },
+    { stim_char: "K", corr_ans: " " },
+    { stim_char: "L", corr_ans: " " },
+    { stim_char: "K", corr_ans: " " },
+    { stim_char: "N", corr_ans: null },
+    { stim_char: "N", corr_ans: null },
+    { stim_char: "N", corr_ans: " " },
+    { stim_char: "C", corr_ans: null },
+    { stim_char: "K", corr_ans: null },
+    { stim_char: "C", corr_ans: " " },
+    { stim_char: "C", corr_ans: null },
+    { stim_char: "K", corr_ans: null },
+  ];
   
+  
+  // ========================================
+  // Stage 2 Trial
+  // ========================================
+  
+  const stage2Trial = {
+    type: jsPsychHtmlKeyboardResponse,
+  
+    stimulus: function () {
+  
+      const stimChar =
+        jsPsych.evaluateTimelineVariable("stim_char");
+  
+      return `
+        <div
+          id="nback-stimulus"
+          class="h-screen flex items-center justify-center select-none"
+        >
+          <div class="text-7xl md:text-8xl font-bold text-gray-800">
+            ${stimChar}
+          </div>
+        </div>
+      `;
+    },
+  
+    // فقط Space پاسخ معتبر است
+    choices: [" "],
+  
+    // کل Trial = 800ms
+    trial_duration: 800,
+  
+    // با زدن Space، Trial تمام نشود
+    response_ends_trial: false,
+  
+    // داده‌های خام Trial
+    data: {
+      trial_type: "nback",
+      task: "response",
+      stage: 2,
+  
+      stim_char: jsPsych.timelineVariable("stim_char"),
+      corr_ans: jsPsych.timelineVariable("corr_ans"),
+    },
+  
+    // بعد از 400ms حرف حذف شود
+    on_load: function () {
+  
+      setTimeout(() => {
+  
+        const stimulus =
+          document.getElementById("nback-stimulus");
+  
+        if (stimulus) {
+          stimulus.innerHTML = "";
+        }
+  
+      }, 400);
+    },
+  };
+  
+  
+  // ========================================
+  // Stage 2 Procedure
+  // ========================================
+  
+  const stage2Procedure = {
+    timeline: [
+      stage2Trial
+    ],
+  
+    timeline_variables: stage2Trials,
+  
+    randomize_order: false,
+  };
+  
+  timeline.push(stage2Procedure);
+  
+
+// ========================================
+// Stage 2 Result
+// ========================================
+
+let stage2FinalScore = 0;
+
+const stage2Result = {
+  type: jsPsychHtmlKeyboardResponse,
+
+  stimulus: function () {
+
+    // ------------------------------------
+    // گرفتن Trialهای مرحله دوم
+    // ------------------------------------
+
+    const trials = jsPsych.data
+      .get()
+      .filter({
+        task: "response",
+        stage: 2,
+      });
+
+
+    // ------------------------------------
+    // محاسبه correct برای هر Trial
+    // ------------------------------------
+
+    trials.values().forEach((trial) => {
+
+      if (trial.corr_ans === null) {
+
+        // Non-target:
+        // نباید پاسخی داده شده باشد
+
+        trial.correct =
+          trial.response === null;
+
+      } else {
+
+        // Target:
+        // باید Space زده شده باشد
+
+        trial.correct =
+          jsPsych.pluginAPI.compareKeys(
+            trial.response,
+            trial.corr_ans
+          );
+
+      }
+
+    });
+
+
+    // ------------------------------------
+    // محاسبه Score
+    // ------------------------------------
+
+    const correctTrials = trials.filter({
+      correct: true,
+    });
+
+    stage2FinalScore = correctTrials.count();
+
+
+    // ------------------------------------
+    // نمایش نتیجه
+    // ------------------------------------
+
+    return `
+      <div class="h-screen flex flex-col items-center justify-center gap-8 px-6">
+
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
+          پایان مرحله دوم
+        </h2>
+
+        <div class="text-4xl md:text-5xl font-bold text-gray-800">
+          ${stage2FinalScore} / 28
+        </div>
+
+        <div class="max-w-3xl bg-blue-100 text-blue-900 rounded-xl p-6 text-lg md:text-xl leading-9 text-center">
+          از شما بابت شرکت در این تست و زمانی که برای انجام آن اختصاص دادید،
+          صمیمانه تشکر می‌کنیم.
+        </div>
+
+        <p class="text-lg text-gray-600">
+          برای پایان دادن به آزمایش، یک کلید از صفحه‌کلید را فشار دهید.
+        </p>
+
+      </div>
+    `;
+  },
+
+  choices: "ALL_KEYS",
+
+  // ------------------------------------
+  // داده‌های Trial مربوط به نتیجه
+  // ------------------------------------
+
+  data: function () {
+
+    return {
+      trial_type: "result",
+
+      task: "final_result",
+
+      stage: 2,
+
+      stage2_score: stage2FinalScore,
+    };
+
+  },
+  on_finish: function () {
+    window.close();
+  },
+};
+
+timeline.push(stage2Result);
+
+
   
   // ========================================
   // Run Experiment
