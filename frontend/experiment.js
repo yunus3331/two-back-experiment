@@ -3,10 +3,24 @@ const jsPsych = initJsPsych({
   display_element: "jspsych-target",
 
   on_finish: function () {
+    console.log("====================================");
+    console.log("ALL JPSYCH DATA");
+    console.log("====================================");
+
     console.log(jsPsych.data.get().values());
+
+    console.log("====================================");
+    console.log("FINAL RESULT");
+    console.log("====================================");
+
+    console.log(finalResult);
   },
 });
 
+
+// ========================================
+// Device Type
+// ========================================
 
 function getDeviceType() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -15,6 +29,21 @@ function getDeviceType() {
     ? "mobile"
     : "desktop";
 }
+
+
+// ========================================
+// Final User Data
+// ========================================
+
+// اطلاعاتی که در طول آزمایش جمع می‌کنیم
+let participantData = {
+  student_id: null,
+  device_type: getDeviceType(),
+};
+
+
+// نتیجه نهایی که در پایان ساخته می‌شود
+let finalResult = null;
 
 
 // ========================================
@@ -166,6 +195,13 @@ const participantInfo = {
         input.focus();
         return;
       }
+
+      // ذخیره مشخصات شرکت‌کننده
+      participantData.student_id = studentId;
+
+      // برای بررسی در Console
+      console.log("Participant Data:");
+      console.log(participantData);
 
       jsPsych.finishTrial({
         student_id: studentId,
@@ -359,6 +395,7 @@ const stage1Trial = {
   type: jsPsychHtmlKeyboardResponse,
 
   stimulus: function () {
+
     const stimChar =
       jsPsych.evaluateTimelineVariable("stim_char");
 
@@ -374,10 +411,8 @@ const stage1Trial = {
     `;
   },
 
-  // پاسخ توسط خودمان مدیریت می‌شود
   choices: "NO_KEYS",
 
-  // Trial با پاسخ تمام نمی‌شود
   response_ends_trial: false,
 
   data: {
@@ -395,10 +430,6 @@ const stage1Trial = {
 
     const deviceType = getDeviceType();
 
-    // ----------------------------------------
-    // متغیرهای مربوط به پاسخ
-    // ----------------------------------------
-
     let response = null;
     let rt = null;
 
@@ -407,13 +438,8 @@ const stage1Trial = {
     let trialFinished = false;
 
 
-    // ----------------------------------------
-    // ثبت پاسخ
-    // ----------------------------------------
-
     function registerResponse() {
 
-      // فقط اولین پاسخ معتبر است
       if (response !== null) {
         return;
       }
@@ -423,10 +449,6 @@ const stage1Trial = {
       rt = performance.now() - trialStartTime;
     }
 
-
-    // ----------------------------------------
-    // Space در دسکتاپ
-    // ----------------------------------------
 
     function handleKeyDown(event) {
 
@@ -439,10 +461,6 @@ const stage1Trial = {
     }
 
 
-    // ----------------------------------------
-    // Touch در موبایل
-    // ----------------------------------------
-
     function handleTouch(event) {
 
       event.preventDefault();
@@ -450,10 +468,6 @@ const stage1Trial = {
       registerResponse();
     }
 
-
-    // ----------------------------------------
-    // اضافه کردن Listenerها
-    // ----------------------------------------
 
     document.addEventListener(
       "keydown",
@@ -471,10 +485,6 @@ const stage1Trial = {
     }
 
 
-    // ----------------------------------------
-    // حذف حرف بعد از 400ms
-    // ----------------------------------------
-
     const stimulusTimeout = setTimeout(() => {
 
       const stimulus =
@@ -487,10 +497,6 @@ const stage1Trial = {
     }, 400);
 
 
-    // ----------------------------------------
-    // پایان Trial بعد از 800ms
-    // ----------------------------------------
-
     setTimeout(() => {
 
       if (trialFinished) {
@@ -500,7 +506,6 @@ const stage1Trial = {
       trialFinished = true;
 
 
-      // حذف Listenerها
       document.removeEventListener(
         "keydown",
         handleKeyDown
@@ -519,7 +524,6 @@ const stage1Trial = {
       clearTimeout(stimulusTimeout);
 
 
-      // ارسال پاسخ به jsPsych
       jsPsych.finishTrial({
         response: response,
         rt: rt,
@@ -529,10 +533,6 @@ const stage1Trial = {
   },
 };
 
-
-// ========================================
-// Stage 1 Procedure
-// ========================================
 
 const stage1Procedure = {
   timeline: [
@@ -587,7 +587,7 @@ const feedbacks = [
 
 
 // ========================================
-// Stage 1 Feedback Trial
+// Stage 1 Feedback
 // ========================================
 
 const stage1Feedback = {
@@ -601,6 +601,7 @@ const stage1Feedback = {
         task: "response",
         stage: 1,
       });
+
 
     trials.values().forEach((trial) => {
 
@@ -621,11 +622,13 @@ const stage1Feedback = {
 
     });
 
+
     const correctTrials = trials.filter({
       correct: true,
     });
 
     stage1FinalScore = correctTrials.count();
+
 
     selectedFeedback =
       feedbacks[
@@ -633,6 +636,20 @@ const stage1Feedback = {
           Math.random() * feedbacks.length
         )
       ];
+
+
+    // ذخیره فیدبک
+    participantData.feedback_type =
+      selectedFeedback.type;
+
+
+    console.log("Stage 1 Score:", stage1FinalScore);
+
+    console.log(
+      "Feedback Type:",
+      participantData.feedback_type
+    );
+
 
     return `
       <div class="min-h-screen flex flex-col items-center justify-center gap-8 px-6">
@@ -888,10 +905,8 @@ const stage2Trial = {
     `;
   },
 
-  // پاسخ توسط خودمان مدیریت می‌شود
   choices: "NO_KEYS",
 
-  // Trial با پاسخ تمام نمی‌شود
   response_ends_trial: false,
 
   data: {
@@ -912,11 +927,6 @@ const stage2Trial = {
 
     const deviceType = getDeviceType();
 
-
-    // ----------------------------------------
-    // متغیرهای مربوط به پاسخ
-    // ----------------------------------------
-
     let response = null;
     let rt = null;
 
@@ -925,13 +935,8 @@ const stage2Trial = {
     let trialFinished = false;
 
 
-    // ----------------------------------------
-    // ثبت پاسخ
-    // ----------------------------------------
-
     function registerResponse() {
 
-      // فقط اولین پاسخ معتبر است
       if (response !== null) {
         return;
       }
@@ -941,10 +946,6 @@ const stage2Trial = {
       rt = performance.now() - trialStartTime;
     }
 
-
-    // ----------------------------------------
-    // Space در دسکتاپ
-    // ----------------------------------------
 
     function handleKeyDown(event) {
 
@@ -957,10 +958,6 @@ const stage2Trial = {
     }
 
 
-    // ----------------------------------------
-    // Touch در موبایل
-    // ----------------------------------------
-
     function handleTouch(event) {
 
       event.preventDefault();
@@ -968,10 +965,6 @@ const stage2Trial = {
       registerResponse();
     }
 
-
-    // ----------------------------------------
-    // اضافه کردن Listenerها
-    // ----------------------------------------
 
     document.addEventListener(
       "keydown",
@@ -989,10 +982,6 @@ const stage2Trial = {
     }
 
 
-    // ----------------------------------------
-    // حذف حرف بعد از 400ms
-    // ----------------------------------------
-
     const stimulusTimeout = setTimeout(() => {
 
       const stimulus =
@@ -1005,10 +994,6 @@ const stage2Trial = {
     }, 400);
 
 
-    // ----------------------------------------
-    // پایان Trial بعد از 800ms
-    // ----------------------------------------
-
     setTimeout(() => {
 
       if (trialFinished) {
@@ -1018,7 +1003,6 @@ const stage2Trial = {
       trialFinished = true;
 
 
-      // حذف Listenerها
       document.removeEventListener(
         "keydown",
         handleKeyDown
@@ -1037,7 +1021,6 @@ const stage2Trial = {
       clearTimeout(stimulusTimeout);
 
 
-      // ارسال پاسخ به jsPsych
       jsPsych.finishTrial({
         response: response,
         rt: rt,
@@ -1076,10 +1059,6 @@ const stage2Result = {
 
   stimulus: function () {
 
-    // ------------------------------------
-    // گرفتن Trialهای مرحله دوم
-    // ------------------------------------
-
     const trials = jsPsych.data
       .get()
       .filter({
@@ -1088,24 +1067,14 @@ const stage2Result = {
       });
 
 
-    // ------------------------------------
-    // محاسبه correct برای هر Trial
-    // ------------------------------------
-
     trials.values().forEach((trial) => {
 
       if (trial.corr_ans === null) {
-
-        // Non-target:
-        // نباید پاسخی داده شده باشد
 
         trial.correct =
           trial.response === null;
 
       } else {
-
-        // Target:
-        // باید Space زده شده باشد
 
         trial.correct =
           jsPsych.pluginAPI.compareKeys(
@@ -1118,10 +1087,6 @@ const stage2Result = {
     });
 
 
-    // ------------------------------------
-    // محاسبه Score
-    // ------------------------------------
-
     const correctTrials = trials.filter({
       correct: true,
     });
@@ -1129,9 +1094,47 @@ const stage2Result = {
     stage2FinalScore = correctTrials.count();
 
 
-    // ------------------------------------
-    // نمایش نتیجه
-    // ------------------------------------
+    // ====================================
+    // ساخت نتیجه نهایی
+    // ====================================
+
+    finalResult = {
+
+      student_id:
+        participantData.student_id,
+
+      stage1_score:
+        stage1FinalScore,
+
+      stage2_score:
+        stage2FinalScore,
+
+      feedback_type:
+        participantData.feedback_type,
+
+      device_type:
+        participantData.device_type,
+    };
+
+
+    // ====================================
+    // نمایش نتیجه در Console
+    // ====================================
+
+    console.log("====================================");
+    console.log("FINAL RESULT CREATED");
+    console.log("====================================");
+
+    console.log(finalResult);
+
+    console.log("Student ID:", finalResult.student_id);
+    console.log("Stage 1 Score:", finalResult.stage1_score);
+    console.log("Stage 2 Score:", finalResult.stage2_score);
+    console.log("Feedback Type:", finalResult.feedback_type);
+    console.log("Device Type:", finalResult.device_type);
+
+    console.log("====================================");
+
 
     return `
       <div class="min-h-screen flex flex-col items-center justify-center gap-8 px-6">
@@ -1166,10 +1169,6 @@ const stage2Result = {
   },
 
   choices: "NO_KEYS",
-
-  // ------------------------------------
-  // فعال کردن دکمه پایان و Enter
-  // ------------------------------------
 
   on_load: function () {
 
@@ -1206,10 +1205,6 @@ const stage2Result = {
     );
   },
 
-  // ------------------------------------
-  // داده‌های Trial مربوط به نتیجه
-  // ------------------------------------
-
   data: function () {
 
     return {
@@ -1220,12 +1215,36 @@ const stage2Result = {
       stage: 2,
 
       stage2_score: stage2FinalScore,
-    };
 
+      student_id:
+        participantData.student_id,
+
+      stage1_score:
+        stage1FinalScore,
+
+      feedback_type:
+        participantData.feedback_type,
+
+      device_type:
+        participantData.device_type,
+    };
   },
 
   on_finish: function () {
-    window.close();
+
+    console.log("====================================");
+    console.log("EXPERIMENT FINISHED");
+    console.log("DATA READY FOR BACKEND");
+    console.log("====================================");
+
+    console.log(finalResult);
+
+    console.log("JSON FORMAT:");
+    console.log(
+      JSON.stringify(finalResult, null, 2)
+    );
+
+
   },
 };
 
