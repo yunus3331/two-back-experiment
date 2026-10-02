@@ -1,67 +1,26 @@
-import sqlite3
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "experiment.db"
+DATABASE_URL = "sqlite:///./experiment.db"
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+Base = declarative_base()
 
 
-def get_connection():
-    connection = sqlite3.connect(
-        DATABASE_URL,
-        timeout=30,
-    )
-
-    connection.row_factory = sqlite3.Row
-
-    # برای همزمانی بهتر در SQLite
-    connection.execute("PRAGMA journal_mode=WAL;")
-    connection.execute("PRAGMA busy_timeout=30000;")
-
-    return connection
-
-
-def create_tables():
-    connection = get_connection()
+def get_db():
+    db = SessionLocal()
 
     try:
-        connection.execute("""
-            CREATE TABLE IF NOT EXISTS participants (
-                id TEXT PRIMARY KEY,
-                created_at TEXT NOT NULL
-            )
-        """)
-
-        connection.execute("""
-            CREATE TABLE IF NOT EXISTS trials (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-                participant_id TEXT NOT NULL,
-
-                stage INTEGER NOT NULL,
-                trial_number INTEGER NOT NULL,
-
-                stim_char TEXT NOT NULL,
-                corr_ans TEXT,
-
-                response TEXT,
-                rt REAL,
-
-                correct INTEGER,
-
-                device_type TEXT NOT NULL,
-
-                created_at TEXT NOT NULL,
-
-                FOREIGN KEY (participant_id)
-                    REFERENCES participants(id),
-
-                UNIQUE (
-                    participant_id,
-                    stage,
-                    trial_number
-                )
-            )
-        """)
-
-        connection.commit()
-
+        yield db
     finally:
-        connection.close()
+        db.close()
