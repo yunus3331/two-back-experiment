@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, func
+from sqlalchemy import Column, Integer, String, func, text
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 import random
@@ -96,30 +96,36 @@ def root():
 def get_next_feedback(
     db: Session = Depends(get_db)
 ):
+    db.execute(text("BEGIN IMMEDIATE"))
 
-    feedback_counters = db.query(FeedbackCounter).all()
+    try:
+        feedback_counters = db.query(FeedbackCounter).all()
 
-    min_count = min(
-        counter.count
-        for counter in feedback_counters
-    )
+        min_count = min(
+            counter.count
+            for counter in feedback_counters
+        )
 
-    least_used = [
-        counter
-        for counter in feedback_counters
-        if counter.count == min_count
-    ]
+        least_used = [
+            counter
+            for counter in feedback_counters
+            if counter.count == min_count
+        ]
 
-    selected_counter = random.choice(least_used)
+        selected_counter = random.choice(least_used)
 
-    selected_counter.count += 1
+        selected_counter.count += 1
 
-    db.commit()
+        db.commit()
 
-    return {
-        "feedback_type": selected_counter.feedback_type,
-        "count": selected_counter.count
-    }
+        return {
+            "feedback_type": selected_counter.feedback_type,
+            "count": selected_counter.count
+        }
+
+    except Exception:
+        db.rollback()
+        raise
 
 
 @app.post("/results")
