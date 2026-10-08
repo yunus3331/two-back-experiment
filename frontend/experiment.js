@@ -23,21 +23,21 @@ async function getNextFeedback() {
 
     const result = await response.json();
     //پاک شود
-    console.log("====================================");
-    console.log("FEEDBACK RECEIVED FROM BACKEND");
-    console.log("====================================");
+    //console.log("====================================");
+    //console.log("FEEDBACK RECEIVED FROM BACKEND");
+    //console.log("====================================");
 
-    console.log(result);
+    //console.log(result);
 
     return result.feedback_type;
 
   } catch (error) {
     //پاک شود
-    console.error("====================================");
-    console.error("ERROR GETTING FEEDBACK");
-    console.error("====================================");
+    //console.error("====================================");
+    //console.error("ERROR GETTING FEEDBACK");
+    //console.error("====================================");
 
-    console.error(error);
+    //console.error(error);
 
     throw error;
   }
@@ -46,9 +46,9 @@ async function getNextFeedback() {
 async function sendExperimentResult() {
 
   if (!finalResult) {
-    console.error(
-      "Final result is not available."
-    );
+    //console.error(
+    //  "Final result is not available."
+    //);
 
     return false;
   }
@@ -1024,9 +1024,9 @@ const stage1FeedbackTrial = {
 
       try {
 
-        console.log(
-          "Requesting feedback from backend..."
-        );
+        //console.log(
+        //  "Requesting feedback from backend..."
+        //);
 
 
         const response = await fetch(
