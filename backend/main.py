@@ -153,32 +153,6 @@ def create_result(
     }
 
 
-@app.post("/results/bulk")
-def create_results(
-    results: list[ExperimentResultCreate],
-    db: Session = Depends(get_db)
-):
-
-    db_results = [
-        ExperimentResult(
-            student_id=result.student_id,
-            stage1_score=result.stage1_score,
-            stage2_score=result.stage2_score,
-            feedback_type=result.feedback_type
-        )
-        for result in results
-    ]
-
-    db.add_all(db_results)
-
-    db.commit()
-
-    return {
-        "message": "Results saved successfully",
-        "count": len(db_results)
-    }
-
-
 @app.get("/results")
 def get_results(
     db: Session = Depends(get_db)

@@ -1,14 +1,13 @@
-//initialize
 const jsPsych = initJsPsych({
   display_element: "jspsych-target",
 
   on_finish: function () {
-    console.log(jsPsych.data.get().values());
-    console.log(finalResult);
+    //console.log(jsPsych.data.get().values());
+    //console.log(finalResult);
   },
 });
 
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = "/api";
 
 async function getNextFeedback() {
   try {
@@ -69,11 +68,11 @@ async function sendExperimentResult() {
   };
 
   //پاک شود
-  console.log("====================================");
-  console.log("SENDING RESULT TO BACKEND");
-  console.log("====================================");
+  //console.log("====================================");
+  //console.log("SENDING RESULT TO BACKEND");
+  //console.log("====================================");
 
-  console.table(data);
+  //console.table(data);
 
 
   try {
@@ -105,11 +104,11 @@ async function sendExperimentResult() {
       await response.json();
 
     //پاک شود
-    console.log("====================================");
-    console.log("BACKEND RESPONSE");
-    console.log("====================================");
+    //console.log("====================================");
+    //console.log("BACKEND RESPONSE");
+    //console.log("====================================");
 
-    console.log(result);
+    //console.log(result);
 
 
     return true;
@@ -118,11 +117,11 @@ async function sendExperimentResult() {
   } catch (error) {
 
     //پاک شود
-    console.error("====================================");
-    console.error("ERROR SENDING RESULT");
-    console.error("====================================");
+    //console.error("====================================");
+    //console.error("ERROR SENDING RESULT");
+    //console.error("====================================");
 
-    console.error(error);
+    //console.error(error);
 
 
     return false;
@@ -364,9 +363,9 @@ const participantInfo = {
         studentId;
 
 
-      console.log("Participant Data:");
+      //console.log("Participant Data:");
 
-      console.log(participantData);
+      //console.log(participantData);
 
 
       jsPsych.finishTrial({
@@ -909,12 +908,12 @@ const stage1FeedbackTrial = {
 
   choices: "NO_KEYS",
 
-  stimulus: ` <div class="min-h-screen flex flex-col items-center justify-center gap-8 px-6 select-none"> <h2 class="text-3xl md:text-4xl font-bold text-gray-800"> پایان مرحله اول </h2> <div id="stage1-score" class="text-4xl md:text-5xl font-bold text-gray-800" > 0 / 28 </div> <div id="stage1-feedback" class="max-w-3xl bg-blue-100 text-blue-900 rounded-xl p-6 text-lg md:text-xl leading-9 text-center" > در حال دریافت بازخورد... </div> <button id="stage1-continue-button" type="button" disabled class="w-full max-w-xs bg-gray-300 text-gray-500 rounded-xl py-3 text-lg font-bold cursor-not-allowed transition" > در حال دریافت بازخورد... </button> <p class="text-gray-400 text-sm"> یا کلید Enter را فشار دهید. </p> </div> `,
+  stimulus: ` <div class="min-h-screen flex flex-col items-center justify-center gap-8 px-6 select-none"> <h2 class="text-3xl md:text-4xl font-bold text-gray-800"> پایان مرحله اول </h2> <div id="stage1-feedback" class="max-w-3xl bg-blue-100 text-blue-900 rounded-xl p-6 text-lg md:text-xl leading-9 text-center" > در حال دریافت بازخورد... </div> <button id="stage1-continue-button" type="button" disabled class="w-full max-w-xs bg-gray-300 text-gray-500 rounded-xl py-3 text-lg font-bold cursor-not-allowed transition" > در حال دریافت بازخورد... </button> <p class="text-gray-400 text-sm"> یا کلید Enter را فشار دهید. </p> </div> `,
   
   on_load: function () {
 
-    const scoreElement =
-      document.getElementById("stage1-score");
+    //const scoreElement =
+    //  document.getElementById("stage1-score");
 
     const feedbackElement =
       document.getElementById("stage1-feedback");
@@ -953,8 +952,8 @@ const stage1FeedbackTrial = {
 
     stage1FinalScore = correctTrials.count();
 
-    scoreElement.innerHTML =
-      `امتیاز شما در مرحله اول: ${stage1FinalScore}/${trials.count()}`;
+    //scoreElement.innerHTML =
+    //  `امتیاز شما در مرحله اول: ${stage1FinalScore}/${trials.count()}`;
 
     let feedbackLoaded = false;
     let loadingFeedback = false;
@@ -981,13 +980,13 @@ const stage1FeedbackTrial = {
         handleButtonClick
       );
 
-      console.log(
-        "Stage 1 feedback finished."
-      );
+      //console.log(
+      //  "Stage 1 feedback finished."
+      //);
 
-      console.log(
-        "Moving to Stage 2..."
-      );
+      //console.log(
+      //  "Moving to Stage 2..."
+      //);
 
       jsPsych.finishTrial();
     }
@@ -1031,7 +1030,7 @@ const stage1FeedbackTrial = {
 
 
         const response = await fetch(
-          "http://127.0.0.1:8000/feedback/next"
+          "/api/feedback/next"
         );
 
 
@@ -1047,10 +1046,10 @@ const stage1FeedbackTrial = {
           await response.json();
 
 
-        console.log(
-          "Feedback received:",
-          result
-        );
+        //console.log(
+        //  "Feedback received:",
+        //  result
+        //);
 
 
         selectedFeedback =
@@ -1094,16 +1093,16 @@ const stage1FeedbackTrial = {
           "ادامه";
 
 
-        console.log(
-          "Feedback successfully displayed."
-        );
+        //console.log(
+        //  "Feedback successfully displayed."
+        //);
 
       } catch (error) {
 
-        console.error(
-          "Error getting feedback:",
-          error
-        );
+        //console.error(
+        //  "Error getting feedback:",
+        //  error
+        //);
 
 
         feedbackElement.innerHTML = `
@@ -1165,21 +1164,21 @@ const stage1FeedbackTrial = {
         : null;
 
 
-    console.log(
-      "Stage 1 feedback trial finished."
-    );
+    //console.log(
+    //  "Stage 1 feedback trial finished."
+    //);
 
-    console.log(
-      "Stage 1 score:",
-      stage1FinalScore
-    );
+    //console.log(
+    //  "Stage 1 score:",
+    //  stage1FinalScore
+    //);
 
-    console.log(
-      "Feedback type:",
-      selectedFeedback
-        ? selectedFeedback.type
-        : null
-    );
+    //console.log(
+    //  "Feedback type:",
+    //  selectedFeedback
+    //    ? selectedFeedback.type
+    //    : null
+    //);
   },
 };
 
@@ -1684,17 +1683,17 @@ const stage2Result = {
     };
 
 
-    console.log("====================================");
+    //console.log("====================================");
 
-    console.log(
-      "FINAL RESULT CREATED"
-    );
+    //console.log(
+    //  "FINAL RESULT CREATED"
+    //);
 
-    console.log("====================================");
+    //console.log("====================================");
 
-    console.table(
-      finalResult
-    );
+    //console.table(
+    //  finalResult
+    //);
 
 
     return `
@@ -1704,11 +1703,6 @@ const stage2Result = {
         <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
           پایان مرحله دوم
         </h2>
-
-
-        <div class="text-4xl md:text-5xl font-bold text-gray-800">
-          28 / ${stage2FinalScore}
-        </div>
 
 
         <div class="max-w-3xl bg-blue-100 text-blue-900 rounded-xl p-6 text-lg md:text-xl leading-9 text-center">
@@ -1778,17 +1772,17 @@ const stage2Result = {
 
       if (success) {
 
-        console.log(
-          "===================================="
-        );
+        //console.log(
+        //  "===================================="
+        //);
 
-        console.log(
-          "EXPERIMENT RESULT SAVED"
-        );
+        //console.log(
+        //  "EXPERIMENT RESULT SAVED"
+        //);
 
-        console.log(
-          "===================================="
-        );
+        //console.log(
+        //  "===================================="
+        //);
 
 
         jsPsych.finishTrial();
@@ -1882,32 +1876,32 @@ const stage2Result = {
 
   on_finish: function () {
 
-    console.log("====================================");
+    //console.log("====================================");
 
-    console.log(
-      "EXPERIMENT FINISHED"
-    );
+    //console.log(
+    //  "EXPERIMENT FINISHED"
+    //);
 
-    console.log("====================================");
-
-
-    console.log(
-      finalResult
-    );
+    //console.log("====================================");
 
 
-    console.log(
-      "JSON FORMAT:"
-    );
+    //console.log(
+    //  finalResult
+    //);
 
 
-    console.log(
-      JSON.stringify(
-        finalResult,
-        null,
-        2
-      )
-    );
+    //console.log(
+    //  "JSON FORMAT:"
+    //);
+
+
+    //console.log(
+    //  JSON.stringify(
+    //    finalResult,
+    //    null,
+    //    2
+    //  )
+    //);
 
   },
 
