@@ -1774,7 +1774,7 @@ const stage2Result = {
 
         if (success) {
           document.body.innerHTML = `
-            <div class="min-h-screen flex flex-col items-center justify-center px-6 bg-gray-50 text-center">
+            <div class="min-h-screen flex flex-col items-center justify-center px-6 bg-gray-50 text-center select-none">
               <div class="max-w-xl rounded-2xl bg-white shadow-lg p-8 md:p-12">
                 <div class="text-green-600 text-5xl mb-6">✓</div>
         
