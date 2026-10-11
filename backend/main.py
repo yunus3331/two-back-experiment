@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, func, text
 from sqlalchemy.orm import Session
@@ -6,6 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import random
+import os
+from io import BytesIO
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
+import secrets
 
 from database import Base, engine, get_db, SessionLocal
 
@@ -157,11 +165,39 @@ def create_result(
         #"finished_at": db_result.finished_at
     }
 
+export_security = HTTPBasic()
+
+def verify_export_access(
+    credentials: HTTPBasicCredentials = Depends(export_security),
+):
+    expected_username = os.getenv("EXPORT_USERNAME")
+    expected_password = os.getenv("EXPORT_PASSWORD")
+
+    if not expected_username or not expected_password:
+        raise HTTPException(
+            status_code=503,
+            detail="Export credentials are not configured",
+        )
+
+    username_ok = secrets.compare_digest(
+        credentials.username, expected_username
+    )
+    password_ok = secrets.compare_digest(
+        credentials.password, expected_password
+    )
+
+    if not (username_ok and password_ok):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
 @app.get("/results")
 def get_results(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _authorized: None = Depends(verify_export_access),
 ):
-
     results = db.query(ExperimentResult).all()
 
     return [
@@ -171,8 +207,80 @@ def get_results(
             "stage1_score": result.stage1_score,
             "stage2_score": result.stage2_score,
             "feedback_type": result.feedback_type,
-            "finished_at": result.finished_at
+            "finished_at": result.finished_at,
         }
         for result in results
     ]
 
+@app.get("/results/export")
+def export_results_to_excel(
+    db: Session = Depends(get_db),
+    _authorized: None = Depends(verify_export_access),
+):
+    results = (
+        db.query(ExperimentResult)
+        .order_by(ExperimentResult.id.asc())
+        .all()
+    )
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Experiment Results"
+
+    headers = [
+        "Student ID",
+        "Stage 1 Score",
+        "Stage 2 Score",
+        "Feedback Type",
+        "Finished At",
+    ]
+    sheet.append(headers)
+
+    for result in results:
+        sheet.append([
+            result.student_id,
+            result.stage1_score,
+            result.stage2_score,
+            result.feedback_type,
+            result.finished_at,
+        ])
+
+    # قالب‌بندی عنوان ستون‌ها
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(
+            fill_type="solid",
+            fgColor="1976D2",
+        )
+        cell.alignment = Alignment(horizontal="center")
+
+    # تنظیم عرض ستون‌ها
+    for column_cells in sheet.columns:
+        max_length = max(
+            len(str(cell.value)) if cell.value is not None else 0
+            for cell in column_cells
+        )
+        column_letter = get_column_letter(column_cells[0].column)
+        sheet.column_dimensions[column_letter].width = min(
+            max_length + 3, 35
+        )
+
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        ),
+        headers={
+            "Content-Disposition": (
+                'attachment; filename="experiment_results.xlsx"'
+            )
+        },
+    )
