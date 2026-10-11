@@ -1772,20 +1772,28 @@ const stage2Result = {
 
       if (success) {
 
-        //console.log(
-        //  "===================================="
-        //);
-
-        //console.log(
-        //  "EXPERIMENT RESULT SAVED"
-        //);
-
-        //console.log(
-        //  "===================================="
-        //);
-
-
-        jsPsych.finishTrial();
+        if (success) {
+          document.body.innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center px-6 bg-gray-50 text-center">
+              <div class="max-w-xl rounded-2xl bg-white shadow-lg p-8 md:p-12">
+                <div class="text-green-600 text-5xl mb-6">✓</div>
+        
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+                  آزمایش با موفقیت به پایان رسید
+                </h1>
+        
+                <p class="text-gray-600 text-lg leading-9">
+                  از همکاری و زمانی که برای شرکت در این پژوهش اختصاص دادید،
+                  صمیمانه سپاسگزاریم.
+                </p>
+        
+                <p class="mt-6 text-sm text-gray-400">
+                  می‌توانید این صفحه را ببندید.
+                </p>
+              </div>
+            </div>
+          `;
+        }
 
 
       } else {
