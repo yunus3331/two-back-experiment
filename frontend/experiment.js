@@ -7,7 +7,7 @@ const jsPsych = initJsPsych({
   },
 });
 
-const BACKEND_URL = "/api";
+const BACKEND_URL = "http://127.0.0.1:8000";
 
 async function getNextFeedback() {
   try {
@@ -1030,7 +1030,7 @@ const stage1FeedbackTrial = {
 
 
         const response = await fetch(
-          "/api/feedback/next"
+          "http://127.0.0.1:8000/feedback/next"
         );
 
 
