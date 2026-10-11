@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, func, text
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import random
 
 from database import Base, engine, get_db, SessionLocal
@@ -28,7 +30,7 @@ class ExperimentResult(Base):
     stage1_score = Column(Integer, nullable=False)
     stage2_score = Column(Integer, nullable=False)
     feedback_type = Column(String, nullable=False)
-
+    finished_at = Column(String, nullable=True)
 
 class FeedbackCounter(Base):
     __tablename__ = "feedback_counters"
@@ -133,25 +135,27 @@ def create_result(
     result: ExperimentResultCreate,
     db: Session = Depends(get_db)
 ):
+    finished_at = datetime.now(ZoneInfo("Asia/Tehran"))
 
     db_result = ExperimentResult(
         student_id=result.student_id,
         stage1_score=result.stage1_score,
         stage2_score=result.stage2_score,
-        feedback_type=result.feedback_type
+        feedback_type=result.feedback_type,
+        finished_at=datetime.now(
+            ZoneInfo("Asia/Tehran")
+        ).isoformat(timespec="seconds")
     )
 
     db.add(db_result)
-
     db.commit()
-
     db.refresh(db_result)
 
     return {
         "message": "Result saved successfully",
-        "id": db_result.id
+        "id": db_result.id,
+        #"finished_at": db_result.finished_at
     }
-
 
 @app.get("/results")
 def get_results(
@@ -166,7 +170,8 @@ def get_results(
             "student_id": result.student_id,
             "stage1_score": result.stage1_score,
             "stage2_score": result.stage2_score,
-            "feedback_type": result.feedback_type
+            "feedback_type": result.feedback_type,
+            "finished_at": result.finished_at
         }
         for result in results
     ]
